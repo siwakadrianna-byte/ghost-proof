@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { WalletButton } from "@/components/tw-blocks/wallet-kit/WalletButtons";
 import { useWalletContext } from "@/components/tw-blocks/providers/WalletProvider";
@@ -60,7 +60,6 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
   const [notFound, setNotFound] = useState(false);
   const [evidence, setEvidence] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const fileInput = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
@@ -194,21 +193,25 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
               <p className="text-sm">
                 Final file (PNG, JPG or WebP). The client only sees a watermarked preview until you&apos;re paid.
               </p>
-              <input
-                ref={fileInput}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              />
+              {/* A native label opens the file picker without any JavaScript */}
               <div className="flex items-center gap-3">
-                <Button type="button" variant="outline" onClick={() => fileInput.current?.click()}>
+                <label
+                  htmlFor="delivery-file"
+                  className="inline-flex h-9 cursor-pointer items-center rounded-md border px-4 text-sm font-medium shadow-xs hover:bg-accent"
+                >
                   {file ? "Change file" : "Choose file"}
-                </Button>
+                </label>
                 <span className="text-sm text-muted-foreground truncate">
                   {file ? `✓ ${file.name}` : "No file chosen yet"}
                 </span>
               </div>
+              <input
+                id="delivery-file"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
               <Input
                 value={evidence}
                 onChange={(e) => setEvidence(e.target.value)}
