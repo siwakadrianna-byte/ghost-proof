@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@tanstack/react-query": "latest",
+    "@tanstack/react-query-devtools": "latest"
+  },
+  "devDependencies": {},
+  "shadcnComponents": []
+}

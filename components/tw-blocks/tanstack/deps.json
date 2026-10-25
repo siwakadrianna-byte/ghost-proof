@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@tanstack/react-query": "latest",
+    "@trustless-work/escrow": "latest"
+  },
+  "devDependencies": {},
+  "shadcnComponents": []
+}
