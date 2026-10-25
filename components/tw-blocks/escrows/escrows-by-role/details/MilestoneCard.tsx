@@ -18,8 +18,8 @@ import {
   SingleReleaseMilestone,
 } from "@trustless-work/escrow";
 import { Badge } from "@/components/ui/badge";
-// import { ChangeMilestoneStatusDialog } from "../../single-multi-release/change-milestone-status/dialog/ChangeMilestoneStatus";
-// import { ApproveMilestoneButton } from "../../single-multi-release/approve-milestone/button/ApproveMilestone";
+import { ChangeMilestoneStatusDialog } from "../../single-multi-release/change-milestone-status/dialog/ChangeMilestoneStatus";
+import { ApproveMilestoneButton } from "../../single-multi-release/approve-milestone/button/ApproveMilestone";
 import { formatCurrency } from "@/components/tw-blocks/helpers/format.helper";
 
 interface MilestoneCardProps {
@@ -106,10 +106,10 @@ const MilestoneCardComponent = ({
       userRolesInEscrow.includes("serviceProvider")
     ) {
       buttons.push(
-        // <ChangeMilestoneStatusDialog
-        //   key={`change-status-${milestoneIndex}`}
-        //   milestoneIndex={milestoneIndex}
-        // />
+        <ChangeMilestoneStatusDialog
+          key={`change-status-${milestoneIndex}`}
+          milestoneIndex={milestoneIndex}
+        />
       );
     }
 
@@ -123,10 +123,10 @@ const MilestoneCardComponent = ({
           !milestone.flags?.resolved))
     ) {
       buttons.push(
-        // <ApproveMilestoneButton
-        //   key={`approve-${milestoneIndex}`}
-        //   milestoneIndex={milestoneIndex}
-        // />
+        <ApproveMilestoneButton
+          key={`approve-${milestoneIndex}`}
+          milestoneIndex={milestoneIndex}
+        />
       );
     }
 

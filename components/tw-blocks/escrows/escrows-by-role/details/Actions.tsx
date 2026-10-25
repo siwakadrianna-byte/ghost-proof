@@ -14,7 +14,10 @@ import {
   GetEscrowsFromIndexerResponse as Escrow,
   Role,
 } from "@trustless-work/escrow/types";
-// import { FundEscrowDialog } from "../../single-multi-release/fund-escrow/dialog/FundEscrow";
+import { FundEscrowDialog } from "../../single-multi-release/fund-escrow/dialog/FundEscrow";
+import { DisputeEscrowButton } from "../../single-release/dispute-escrow/button/DisputeEscrow";
+import { ResolveDisputeDialog } from "../../single-release/resolve-dispute/dialog/ResolveDispute";
+import { ReleaseEscrowButton } from "../../single-release/release-escrow/button/ReleaseEscrow";
 
 interface ActionsProps {
   selectedEscrow: Escrow;
@@ -145,15 +148,15 @@ export const Actions = ({
 
           {/* Works only with single-release escrows */}
           {/* Only appears if the escrow has balance */}
-          {/* {shouldShowDisputeButton && <DisputeEscrowButton />} */}
+          {shouldShowDisputeButton && <DisputeEscrowButton />}
 
           {/* Works only with single-release escrows */}
           {/* Only appears if the escrow is disputed */}
-          {/* {shouldShowResolveButton && <ResolveDisputeDialog />} */}
+          {shouldShowResolveButton && <ResolveDisputeDialog />}
 
           {/* Works only with single-release escrows */}
           {/* Only appears if all the milestones are approved */}
-          {/* {shouldShowReleaseFundsButton && <ReleaseEscrowButton />} */}
+          {shouldShowReleaseFundsButton && <ReleaseEscrowButton />}
 
           {/* Multi-release: Withdraw Remaining Funds */}
           {/* {shouldShowWithdrawRemaining && <WithdrawRemainingFundsDialog />} */}
@@ -161,7 +164,7 @@ export const Actions = ({
       )}
 
       {/* FundEscrow */}
-      {/* <FundEscrowDialog /> */}
+      <FundEscrowDialog />
     </div>
   );
 };
