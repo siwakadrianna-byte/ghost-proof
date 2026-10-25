@@ -13,7 +13,9 @@ export default function Demo() {
         <WalletButton />
       </header>
       <div className="flex justify-end mb-4">
-        <InitializeEscrowDialog />
+        <div className="w-48">
+          <InitializeEscrowDialog />
+        </div>
       </div>
       <EscrowsByRoleCards />
     </div>

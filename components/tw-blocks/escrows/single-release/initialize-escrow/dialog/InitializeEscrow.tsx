@@ -456,9 +456,14 @@ export const InitializeEscrowDialog = () => {
                       value={milestone.description}
                       className="w-full sm:flex-1"
                       onChange={(e) => {
-                        const updatedMilestones = [...milestones];
-                        updatedMilestones[index].description = e.target.value;
-                        form.setValue("milestones", updatedMilestones);
+                        // Ghost-Proof fix: build a new array so the form re-renders while typing
+                        const updatedMilestones = milestones.map((m, i) =>
+                          i === index ? { ...m, description: e.target.value } : m
+                        );
+                        form.setValue("milestones", updatedMilestones, {
+                          shouldValidate: true,
+                          shouldDirty: true,
+                        });
                       }}
                     />
 
