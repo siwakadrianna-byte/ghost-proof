@@ -122,6 +122,29 @@ export function useJobActions(job: JobView | undefined, wallet: string | null, o
         await report("released", await signAndSend(unsignedTransaction));
       }),
 
+    /**
+     * Designer: the Ghost Timer ran out. Designer signs "start dispute",
+     * then our server (the dispute resolver) pays the designer 100%.
+     */
+    claimPayment: () =>
+      run("claim", async () => {
+        let disputeTxHash: string | undefined;
+        if (job!.status === "delivered") {
+          const { unsignedTransaction } = await startDispute(
+            { contractId, signer: wallet! },
+            "single-release"
+          );
+          disputeTxHash = await signAndSend(unsignedTransaction);
+        }
+        const res = await fetch(`/api/jobs/${job!.id}/claim`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ disputeTxHash }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+      }),
+
     /** Client or designer: open a dispute. */
     dispute: (note: string) =>
       run("dispute", async () => {

@@ -32,6 +32,8 @@ export type Job = {
   status: JobStatus;
   deliveredAt?: string;
   deadline?: string; // ISO time when silence counts as approval
+  ghostClaim?: boolean; // dispute was opened by the Ghost Timer, not by a disagreement
+  resolution?: { designerPercent: number };
   events: JobEvent[];
   createdAt: string;
 };

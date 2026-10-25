@@ -19,7 +19,7 @@ const STATUS_TEXT: Record<JobStatus, { label: string; help: string }> = {
   approved: { label: "Approved", help: "The client approved. One more signature releases the money." },
   released: { label: "Paid ✅", help: "The money is in the designer's wallet." },
   disputed: { label: "In dispute", help: "Ghost-Proof will decide the fair split." },
-  resolved: { label: "Resolved", help: "The dispute was settled on-chain." },
+  resolved: { label: "Resolved", help: "Ghost-Proof settled it on-chain." },
 };
 
 const EVENT_TEXT: Record<string, string> = {
@@ -30,6 +30,7 @@ const EVENT_TEXT: Record<string, string> = {
   approved: "Client approved",
   released: "Payment released to designer",
   disputed: "Dispute opened",
+  ghost_claim: "👻 Ghost Timer ended, designer claimed payment",
   resolved: "Dispute resolved",
 };
 
@@ -184,16 +185,30 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
             </div>
           )}
 
-          {/* Designer: Ghost Timer claim (step 8) */}
-          {isDesigner && job.status === "delivered" && (
-            <Button className="w-full" variant="outline" disabled>
-              {timerDone ? "Claim payment (coming next)" : "Claim payment unlocks when the Ghost Timer ends"}
-            </Button>
+          {/* Designer: Ghost Timer claim */}
+          {isDesigner && (job.status === "delivered" || (job.status === "disputed" && job.ghostClaim)) && (
+            <div className="space-y-2">
+              {timerDone ? (
+                <p>The client went silent. Silence = yes, so you can claim your payment now.</p>
+              ) : (
+                <p>Waiting for the client to review. If they ghost you, you can claim when the timer hits zero.</p>
+              )}
+              <Button className="w-full" onClick={actions.claimPayment} disabled={!timerDone || !!actions.busy}>
+                {actions.busy === "claim"
+                  ? "Claiming… check Freighter"
+                  : timerDone
+                    ? `👻 Claim ${job.price} USDC`
+                    : "Claim payment unlocks when the Ghost Timer ends"}
+              </Button>
+            </div>
           )}
 
           {/* Waiting states */}
           {isClient && job.status === "funded" && <p>Your payment is locked. Waiting for the designer to deliver.</p>}
           {job.status === "released" && <p className="text-lg font-semibold">All done. The designer has been paid. 🎉</p>}
+          {job.status === "resolved" && job.ghostClaim && (
+            <p className="text-lg font-semibold">The client ghosted, but the designer got paid anyway. 👻💸</p>
+          )}
 
           {actions.error && <p className="text-sm text-destructive">{actions.error}</p>}
         </section>
