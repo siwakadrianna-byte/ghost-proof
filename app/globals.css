@@ -7,9 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-instrument-serif);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-instrument-serif);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,38 +50,48 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Ghost-Proof palette, sampled from the aurora artwork */
+  --gp-night: #0c1613;
+  --gp-forest: #174439;
+  --gp-plum: #42174b;
+  --gp-indigo: #2c2a55;
+  --gp-gold: #d4bc2a;
+  --gp-mint: #bff3e5;
+  --gp-sage: #62a691;
+
+  --background: var(--gp-night);
+  --foreground: #eef7f2;
+  --card: rgb(255 255 255 / 0.06);
+  --card-foreground: #eef7f2;
+  --popover: #13211d;
+  --popover-foreground: #eef7f2;
+  --primary: var(--gp-mint);
+  --primary-foreground: #0c1613;
+  --secondary: rgb(255 255 255 / 0.08);
+  --secondary-foreground: #eef7f2;
+  --muted: rgb(255 255 255 / 0.07);
+  --muted-foreground: rgb(238 247 242 / 0.62);
+  --accent: rgb(191 243 229 / 0.12);
+  --accent-foreground: #eef7f2;
+  --destructive: #ff8a7a;
+  --border: rgb(255 255 255 / 0.12);
+  --input: rgb(255 255 255 / 0.16);
+  --ring: var(--gp-mint);
+  --chart-1: var(--gp-mint);
+  --chart-2: var(--gp-gold);
+  --chart-3: var(--gp-sage);
+  --chart-4: #9a6bb0;
+  --chart-5: #4c627c;
+  --radius: 0.875rem;
+  --sidebar: #13211d;
+  --sidebar-foreground: #eef7f2;
+  --sidebar-primary: var(--gp-mint);
+  --sidebar-primary-foreground: #0c1613;
+  --sidebar-accent: rgb(255 255 255 / 0.08);
+  --sidebar-accent-foreground: #eef7f2;
+  --sidebar-border: rgb(255 255 255 / 0.12);
+  --sidebar-ring: var(--gp-mint);
+  color-scheme: dark;
 }
 
 .dark {
@@ -127,4 +138,87 @@
   html {
     @apply font-sans;
   }
+}
+/* ---------- Ghost-Proof look ---------- */
+
+/* Drifting aurora behind every page (moves slowly, and shifts as you scroll) */
+.aurora {
+  position: fixed;
+  inset: -20vmax;
+  z-index: -2;
+  background: var(--gp-night);
+  overflow: hidden;
+  pointer-events: none;
+}
+.aurora__blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.85;
+  will-change: transform;
+}
+.aurora__blob--plum {
+  width: 60vmax; height: 50vmax; left: 8vmax; top: 10vmax;
+  background: radial-gradient(closest-side, #5b1f66, #42174b 55%, transparent);
+  animation: drift-a 26s ease-in-out infinite alternate;
+  transform: translateY(calc(var(--scroll, 0) * -18vmax));
+}
+.aurora__blob--gold {
+  width: 50vmax; height: 30vmax; right: 6vmax; top: 4vmax;
+  background: radial-gradient(closest-side, #d4bc2a, #6c6624 55%, transparent);
+  opacity: 0.7;
+  animation: drift-b 30s ease-in-out infinite alternate;
+}
+.aurora__blob--mint {
+  width: 65vmax; height: 34vmax; right: 4vmax; bottom: 8vmax;
+  background: radial-gradient(closest-side, #c1f6e5, #83bbab 45%, #2c6a57 70%, transparent);
+  opacity: 0.75;
+  animation: drift-c 24s ease-in-out infinite alternate;
+}
+.aurora__blob--indigo {
+  width: 50vmax; height: 40vmax; left: 30vmax; top: 34vmax;
+  background: radial-gradient(closest-side, #504568, #2c2a55 60%, transparent);
+  animation: drift-b 34s ease-in-out infinite alternate-reverse;
+}
+.aurora__vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 35%, #174439 95%);
+  opacity: 0.9;
+}
+@keyframes drift-a { to { translate: 8vmax 6vmax; scale: 1.1; } }
+@keyframes drift-b { to { translate: -10vmax 5vmax; scale: 0.92; } }
+@keyframes drift-c { to { translate: -12vmax -6vmax; scale: 1.08; } }
+
+/* Film grain, like the artwork */
+.grain {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  opacity: 0.22; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Frosted glass cards */
+.glass {
+  background: rgb(12 22 19 / 0.45);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 1.25rem;
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  box-shadow: 0 20px 60px -30px rgb(0 0 0 / 0.6);
+}
+
+.font-display { font-family: var(--font-instrument-serif), Georgia, serif; font-weight: 400; letter-spacing: -0.01em; }
+.text-mint { color: var(--gp-mint); }
+.text-gold { color: var(--gp-gold); }
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(32px); filter: blur(6px);
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.9s ease; }
+.reveal.is-visible { opacity: 1; transform: none; filter: none; }
+
+@keyframes float { 50% { transform: translateY(-14px) rotate(-2deg); } }
+.float { animation: float 6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora__blob, .float { animation: none !important; }
+  .reveal { opacity: 1; transform: none; filter: none; transition: none; }
 }

@@ -37,14 +37,14 @@ export default function ResolverPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8 space-y-6">
-      <header>
-        <Link href="/" className="text-2xl font-bold">Ghost-Proof</Link>
-        <p className="text-muted-foreground">Dispute desk: Ghost-Proof decides the fair split.</p>
+    <div className="container mx-auto max-w-2xl px-4 py-12 space-y-6">
+      <header className="text-center">
+        <Link href="/" className="font-display text-5xl">Dispute desk</Link>
+        <p className="text-muted-foreground mt-2">Ghost-Proof decides the fair split when designer and client can&apos;t agree.</p>
       </header>
 
       {jobs === null ? (
-        <form onSubmit={(e) => { e.preventDefault(); load(); }} className="flex gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); load(); }} className="glass flex gap-2 p-4">
           <Input type="password" value={passcode} onChange={(e) => setPasscode(e.target.value)} placeholder="Resolver passcode" />
           <Button type="submit">Open</Button>
         </form>
@@ -54,12 +54,12 @@ export default function ResolverPage() {
         jobs.map((job) => {
           const pct = split[job.id] ?? job.dispute?.proposedDesignerPercent ?? 50;
           return (
-            <section key={job.id} className="rounded-xl border p-6 space-y-3">
+            <section key={job.id} className="glass p-6 space-y-3">
               <div className="flex justify-between gap-2">
                 <Link href={`/job/${job.id}`} className="font-semibold underline">{job.title}</Link>
                 <span>{job.price} USDC</span>
               </div>
-              <div className="rounded-lg bg-muted p-3 text-sm">
+              <div className="rounded-xl bg-white/5 border border-white/10 p-3 text-sm">
                 Client: &ldquo;{job.dispute?.reason}&rdquo; (proposed {job.dispute?.proposedDesignerPercent}% to designer)
                 {job.dispute?.escalated && <div className="mt-1">Designer disagreed and asked Ghost-Proof to decide.</div>}
               </div>

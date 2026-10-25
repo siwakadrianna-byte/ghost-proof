@@ -1,8 +1,7 @@
 "use client";
 
 import { use, useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { WalletButton } from "@/components/tw-blocks/wallet-kit/WalletButtons";
+import { SiteHeader } from "@/components/ghost/SiteHeader";
 import { useWalletContext } from "@/components/tw-blocks/providers/WalletProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,14 +101,14 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
     <Shell>
       <div className="space-y-6">
         {/* Job summary */}
-        <section className="rounded-xl border p-6 space-y-3">
+        <section className="glass p-6 space-y-3">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-2xl font-bold">{job.title}</h2>
+              <h2 className="font-display text-4xl">{job.title}</h2>
               {job.description && <p className="text-muted-foreground mt-1">{job.description}</p>}
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold">{job.price} USDC</div>
+              <div className="text-3xl font-semibold">{job.price} USDC</div>
               {job.balance !== null && (
                 <div className="text-sm text-muted-foreground">In escrow: {job.balance} USDC</div>
               )}
@@ -124,14 +123,14 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
         </section>
 
         {/* Status + Ghost Timer */}
-        <section className="rounded-xl border p-6 text-center space-y-2">
+        <section className="glass p-6 text-center space-y-2">
           <div className="text-sm uppercase tracking-wide text-muted-foreground">Status</div>
-          <div className="text-2xl font-bold">{status.label}</div>
+          <div className="font-display text-4xl">{status.label}</div>
           <p className="text-muted-foreground">{status.help}</p>
           {job.status === "delivered" && countdown && (
             <div className="pt-4">
-              <div className="text-sm uppercase tracking-wide text-muted-foreground">Ghost Timer</div>
-              <div className="text-6xl font-mono font-bold tabular-nums">{countdown.text}</div>
+              <div className="text-sm uppercase tracking-[0.3em] text-gold">Ghost Timer</div>
+              <div className={`text-6xl font-mono tabular-nums ${timerDone ? "text-mint" : ""}`}>{countdown.text}</div>
               <p className="text-sm text-muted-foreground mt-1">
                 {timerDone
                   ? "Time's up. The client stayed silent, so the designer can claim the payment."
@@ -143,8 +142,8 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
 
         {/* Delivered work */}
         {job.file && (
-          <section className="rounded-xl border p-6 space-y-3">
-            <h3 className="font-semibold">Delivered work</h3>
+          <section className="glass p-6 space-y-3">
+            <h3 className="font-display text-2xl">Delivered work</h3>
             {job.unlocked ? (
               <>
                 <p className="text-sm text-muted-foreground">Paid, so the full-resolution file is unlocked. 🔓</p>
@@ -167,7 +166,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
         )}
 
         {/* Actions */}
-        <section className="rounded-xl border p-6 space-y-4">
+        <section className="glass p-6 space-y-4">
           {!walletAddress && <p>Connect your wallet (top right) to continue.</p>}
 
           {/* Designer: share the link */}
@@ -299,7 +298,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
           {/* Dispute in progress */}
           {job.status === "disputed" && job.dispute && !job.ghostClaim && (
             <div className="space-y-3">
-              <div className="rounded-lg bg-muted p-4 space-y-1">
+              <div className="rounded-xl bg-white/5 border border-white/10 p-4 space-y-1">
                 <p className="text-sm text-muted-foreground">Client says:</p>
                 <p className="font-medium">&ldquo;{job.dispute.reason}&rdquo;</p>
                 <p className="text-sm">
@@ -359,10 +358,10 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
         </section>
 
         {/* On-chain proof */}
-        <section className="rounded-xl border p-6 space-y-3">
-          <h3 className="font-semibold">On-chain proof</h3>
+        <section className="glass p-6 space-y-3">
+          <h3 className="font-display text-2xl">On-chain proof</h3>
           {job.contractId && (
-            <a className="text-sm underline" href={`${EXPLORER}/contract/${job.contractId}`} target="_blank" rel="noreferrer">
+            <a className="text-sm text-mint underline" href={`${EXPLORER}/contract/${job.contractId}`} target="_blank" rel="noreferrer">
               View the escrow contract on Stellar Expert ↗
             </a>
           )}
@@ -392,12 +391,9 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8">
-      <header className="flex items-center justify-between mb-8">
-        <Link href="/" className="text-2xl font-bold">Ghost-Proof</Link>
-        <WalletButton />
-      </header>
-      {children}
-    </div>
+    <>
+      <SiteHeader />
+      <div className="container mx-auto max-w-2xl px-4 py-8">{children}</div>
+    </>
   );
 }
