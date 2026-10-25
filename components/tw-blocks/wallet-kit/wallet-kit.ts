@@ -90,8 +90,9 @@ export const signTransaction = async ({
   console.log("[Ghost-Proof] asking wallet to sign", { address });
 
   // Ghost-Proof: fail with a clear message instead of spinning forever
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(
       () =>
         reject(
           new Error(
@@ -99,8 +100,8 @@ export const signTransaction = async ({
           )
         ),
       120_000
-    )
-  );
+    );
+  });
 
   const { signedTxXdr } = await Promise.race([
     StellarWalletsKit.signTransaction(unsignedTransaction, {
@@ -108,7 +109,7 @@ export const signTransaction = async ({
       networkPassphrase: Networks.TESTNET, // Adjust this to the network you are using
     }),
     timeout,
-  ]);
+  ]).finally(() => clearTimeout(timer));
 
   console.log("[Ghost-Proof] wallet signed", { signed: !!signedTxXdr });
   return signedTxXdr;
