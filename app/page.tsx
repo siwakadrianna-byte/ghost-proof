@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { SiteHeader, GhostMark } from "@/components/ghost/SiteHeader";
 import { Reveal, useSectionProgress } from "@/components/ghost/scroll";
+import { GhostTrail } from "@/components/ghost/GhostTrail";
 import { Button } from "@/components/ui/button";
 
 const STEPS = [
@@ -57,8 +58,8 @@ function Hero() {
         className="sticky top-0 flex h-screen flex-col items-center justify-center px-4 text-center"
         style={{ opacity: 1 - progress * 1.4, transform: `scale(${1 - progress * 0.12})` }}
       >
-        <div className="float mb-8" style={{ transform: `translateY(${progress * -120}px)` }}>
-          <GhostMark className="h-20 w-20 drop-shadow-[0_0_40px_rgba(191,243,229,0.45)]" />
+        <div className="mb-6" style={{ transform: `translateY(${progress * -120}px)` }}>
+          <GhostTrail />
         </div>
         <p className="mb-5 text-sm uppercase tracking-[0.3em] text-mint">Escrow for freelance designers</p>
         <h1 className="font-display text-6xl leading-[0.95] sm:text-8xl md:text-9xl">
