@@ -42,3 +42,4 @@ next-env.d.ts
 
 # Ghost-Proof local data (jobs + uploads)
 /data
+!.env.example
