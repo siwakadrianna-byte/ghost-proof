@@ -197,7 +197,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
               <input
                 ref={fileInput}
                 type="file"
-                accept="image/png,image/jpeg,image/webp"
+                accept="image/*"
                 className="hidden"
                 onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               />
