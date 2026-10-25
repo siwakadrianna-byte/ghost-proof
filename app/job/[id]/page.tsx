@@ -18,7 +18,7 @@ const STATUS_TEXT: Record<JobStatus, { label: string; help: string }> = {
   delivered: { label: "Delivered, in review", help: "The client can approve. If they stay silent, the Ghost Timer pays the designer." },
   approved: { label: "Approved", help: "The client approved. One more signature releases the money." },
   released: { label: "Paid ✅", help: "The money is in the designer's wallet." },
-  disputed: { label: "In dispute", help: "Ghost-Proof will decide the fair split." },
+  disputed: { label: "In dispute ⚖️", help: "The Ghost Timer is paused while the split is agreed." },
   resolved: { label: "Resolved", help: "Ghost-Proof settled it on-chain." },
 };
 
@@ -30,6 +30,7 @@ const EVENT_TEXT: Record<string, string> = {
   approved: "Client approved",
   released: "Payment released to designer",
   disputed: "Dispute opened",
+  escalated: "Designer asked Ghost-Proof to decide",
   ghost_claim: "👻 Ghost Timer ended, designer claimed payment",
   resolved: "Dispute resolved",
 };
@@ -61,6 +62,9 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
   const [evidence, setEvidence] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [disputeOpen, setDisputeOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [proposal, setProposal] = useState(50);
   const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
@@ -247,6 +251,83 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
                 {actions.busy === "approve" ? "Paying… check Freighter" : `Approve & pay ${job.price} USDC`}
               </Button>
             </div>
+          )}
+
+          {/* Client: raise a dispute (only while the Ghost Timer is running) */}
+          {isClient && job.status === "delivered" && !timerDone && (
+            <div className="space-y-3 border-t pt-4">
+              {!disputeOpen ? (
+                <Button variant="outline" className="w-full" onClick={() => setDisputeOpen(true)}>
+                  Not happy? Raise a dispute
+                </Button>
+              ) : (
+                <>
+                  <p className="font-medium">What went wrong? (one sentence)</p>
+                  <Input
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Only 1 of the 3 logo variations was delivered."
+                  />
+                  <p className="font-medium">
+                    Fair split: designer gets <b>{proposal}%</b> ({((job.price * proposal) / 100).toFixed(2)} USDC), you get{" "}
+                    <b>{100 - proposal}%</b> back
+                  </p>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={proposal}
+                    onChange={(e) => setProposal(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex gap-2">
+                    <Button variant="ghost" onClick={() => setDisputeOpen(false)}>Cancel</Button>
+                    <Button
+                      className="flex-1"
+                      onClick={() => actions.dispute(reason, proposal)}
+                      disabled={!reason.trim() || !!actions.busy}
+                    >
+                      {actions.busy === "dispute" ? "Opening dispute… check Freighter" : "Open dispute & pause the timer"}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Dispute in progress */}
+          {job.status === "disputed" && job.dispute && !job.ghostClaim && (
+            <div className="space-y-3">
+              <div className="rounded-lg bg-muted p-4 space-y-1">
+                <p className="text-sm text-muted-foreground">Client says:</p>
+                <p className="font-medium">&ldquo;{job.dispute.reason}&rdquo;</p>
+                <p className="text-sm">
+                  Proposed split: designer <b>{job.dispute.proposedDesignerPercent}%</b> · client refund{" "}
+                  <b>{100 - job.dispute.proposedDesignerPercent}%</b>
+                </p>
+              </div>
+              {job.dispute.escalated ? (
+                <p>The designer didn&apos;t agree, so Ghost-Proof is reviewing the work and will decide the fair split.</p>
+              ) : isDesigner ? (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button className="flex-1" onClick={() => actions.answerDispute("accept")} disabled={!!actions.busy}>
+                    {actions.busy === "accept" ? "Settling…" : `Accept ${job.dispute.proposedDesignerPercent}%`}
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={() => actions.answerDispute("escalate")} disabled={!!actions.busy}>
+                    Disagree, let Ghost-Proof decide
+                  </Button>
+                </div>
+              ) : (
+                <p>Waiting for the designer to accept your proposal.</p>
+              )}
+            </div>
+          )}
+
+          {job.status === "resolved" && !job.ghostClaim && job.resolution && (
+            <p className="text-lg font-semibold">
+              Settled: designer received {job.resolution.designerPercent}%, client refunded {100 - job.resolution.designerPercent}%.
+            </p>
           )}
 
           {/* Designer: Ghost Timer claim */}

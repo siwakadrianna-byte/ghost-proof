@@ -12,7 +12,7 @@ const NEXT_STATUS: Record<string, JobStatus> = {
 
 export async function POST(request: Request, ctx: RouteContext<"/api/jobs/[id]/event">) {
   const { id } = await ctx.params;
-  const { type, txHash, note } = await request.json();
+  const { type, txHash, note, designerPercent } = await request.json();
   if (!NEXT_STATUS[type]) return NextResponse.json({ error: "Unknown event" }, { status: 400 });
   if (!(await getJob(id))) return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
@@ -20,6 +20,10 @@ export async function POST(request: Request, ctx: RouteContext<"/api/jobs/[id]/e
     const now = new Date();
     j.status = NEXT_STATUS[type];
     j.events.push({ type, at: now.toISOString(), txHash, note });
+    if (type === "disputed") {
+      const pct = Math.min(100, Math.max(0, Number(designerPercent) || 0));
+      j.dispute = { reason: String(note || ""), proposedDesignerPercent: pct };
+    }
     if (type === "delivered") {
       // Start the Ghost Timer
       j.deliveredAt = now.toISOString();

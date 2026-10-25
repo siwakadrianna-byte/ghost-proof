@@ -34,6 +34,11 @@ export type Job = {
   deadline?: string; // ISO time when silence counts as approval
   ghostClaim?: boolean; // dispute was opened by the Ghost Timer, not by a disagreement
   resolution?: { designerPercent: number };
+  dispute?: {
+    reason: string;
+    proposedDesignerPercent: number; // client's proposal
+    escalated?: boolean; // designer rejected the proposal, Ghost-Proof decides
+  };
   file?: { fileName: string; ext: string }; // delivered file (original + watermarked preview in data/uploads)
   events: JobEvent[];
   createdAt: string;
@@ -81,4 +86,8 @@ export async function updateJob(id: string, fn: (job: Job) => void) {
   fn(job);
   await writeAll(jobs);
   return job;
+}
+
+export async function listJobs() {
+  return Object.values(await readAll()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

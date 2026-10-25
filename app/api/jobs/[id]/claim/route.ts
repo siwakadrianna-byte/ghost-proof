@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getJob, updateJob } from "@/lib/jobs";
-import { getEscrowBalance, resolveDispute } from "@/lib/trustless-server";
+import { resolveJob } from "@/lib/resolve";
 
 /**
  * Ghost Timer: the review window ended and the client stayed silent.
@@ -35,20 +35,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/jobs/[id]/c
   }
 
   try {
-    const balance = await getEscrowBalance(job.contractId);
-    const result = await resolveDispute(job.contractId, [
-      { address: job.designerAddress, amount: balance },
-    ]);
-    const updated = await updateJob(id, (j) => {
-      j.status = "resolved";
-      j.resolution = { designerPercent: 100 };
-      j.events.push({
-        type: "resolved",
-        at: new Date().toISOString(),
-        txHash: result.txHash,
-        note: "Silence = yes. 100% paid to the designer",
-      });
-    });
+    const updated = await resolveJob(job, 100, "Silence = yes. 100% paid to the designer");
     return NextResponse.json(updated);
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 502 });

@@ -41,11 +41,11 @@ export function useJobActions(job: JobView | undefined, wallet: string | null, o
     return Array.from(hash, (b) => b.toString(16).padStart(2, "0")).join("");
   }
 
-  async function report(type: string, txHash?: string, note?: string) {
+  async function report(type: string, txHash?: string, note?: string, designerPercent?: number) {
     await fetch(`/api/jobs/${job!.id}/event`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, txHash, note }),
+      body: JSON.stringify({ type, txHash, note, designerPercent }),
     });
   }
 
@@ -154,14 +154,26 @@ export function useJobActions(job: JobView | undefined, wallet: string | null, o
         if (!res.ok) throw new Error(data.error);
       }),
 
-    /** Client or designer: open a dispute. */
-    dispute: (note: string) =>
+    /** Client: open a dispute with one sentence and a proposed split. Pauses the Ghost Timer. */
+    dispute: (reason: string, designerPercent: number) =>
       run("dispute", async () => {
         const { unsignedTransaction } = await startDispute(
           { contractId, signer: wallet! },
           "single-release"
         );
-        await report("disputed", await signAndSend(unsignedTransaction), note);
+        await report("disputed", await signAndSend(unsignedTransaction), reason, designerPercent);
+      }),
+
+    /** Designer: accept the client's split, or let Ghost-Proof decide. */
+    answerDispute: (action: "accept" | "escalate") =>
+      run(action, async () => {
+        const res = await fetch(`/api/jobs/${job!.id}/dispute`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action, designerAddress: wallet }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
       }),
   };
 }
