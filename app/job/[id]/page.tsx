@@ -59,6 +59,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
   const [job, setJob] = useState<JobView>();
   const [notFound, setNotFound] = useState(false);
   const [evidence, setEvidence] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
@@ -135,6 +136,31 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
           )}
         </section>
 
+        {/* Delivered work */}
+        {job.file && (
+          <section className="rounded-xl border p-6 space-y-3">
+            <h3 className="font-semibold">Delivered work</h3>
+            {job.unlocked ? (
+              <>
+                <p className="text-sm text-muted-foreground">Paid, so the full-resolution file is unlocked. 🔓</p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/api/jobs/${job.id}/download?inline=1`} alt="Delivered work" className="w-full rounded-lg border" />
+                <a href={`/api/jobs/${job.id}/download`} className="block">
+                  <Button className="w-full">Download full-resolution file</Button>
+                </a>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Watermarked preview. The clean, full-resolution file unlocks when the designer is paid. 🔒
+                </p>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/api/jobs/${job.id}/preview?v=${job.events.length}`} alt="Watermarked preview" className="w-full rounded-lg border" />
+              </>
+            )}
+          </section>
+        )}
+
         {/* Actions */}
         <section className="rounded-xl border p-6 space-y-4">
           {!walletAddress && <p>Connect your wallet (top right) to continue.</p>}
@@ -164,12 +190,20 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
           {isDesigner && job.status === "funded" && (
             <div className="space-y-2">
               <p className="font-medium">Deliver your work</p>
+              <label className="block space-y-1.5">
+                <span className="text-sm">Final file (PNG, JPG or WebP). The client only sees a watermarked preview until you&apos;re paid.</span>
+                <Input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
               <Input
                 value={evidence}
                 onChange={(e) => setEvidence(e.target.value)}
-                placeholder="Link or note about the delivery (e.g. Final logo, v3)"
+                placeholder="A note for the client (e.g. Final logo, v3)"
               />
-              <Button className="w-full" onClick={() => actions.deliver(evidence || "Delivered")} disabled={!!actions.busy}>
+              <Button className="w-full" onClick={() => actions.deliver(evidence || "Delivered", file)} disabled={!!actions.busy || !file}>
                 {actions.busy === "deliver" ? "Delivering… check Freighter" : "Mark as delivered & start Ghost Timer"}
               </Button>
             </div>

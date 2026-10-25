@@ -14,7 +14,7 @@ import { signTransaction } from "@/components/tw-blocks/wallet-kit/wallet-kit";
 import { handleError, ErrorResponse } from "@/components/tw-blocks/handle-errors/handle";
 import type { Job } from "@/lib/jobs";
 
-export type JobView = Job & { balance: number | null };
+export type JobView = Job & { balance: number | null; unlocked: boolean };
 
 /**
  * Every Ghost-Proof action follows the same pattern:
@@ -90,8 +90,17 @@ export function useJobActions(job: JobView | undefined, wallet: string | null, o
       }),
 
     /** Designer: mark the work as delivered — this starts the Ghost Timer. */
-    deliver: (evidence: string) =>
+    deliver: (evidence: string, file: File | null) =>
       run("deliver", async () => {
+        if (file) {
+          const form = new FormData();
+          form.append("file", file);
+          form.append("designerAddress", wallet!);
+          const res = await fetch(`/api/jobs/${job!.id}/upload`, { method: "POST", body: form });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          evidence = `${evidence} | preview: ${window.location.origin}${data.previewUrl}`;
+        }
         const { unsignedTransaction } = await changeMilestoneStatus(
           {
             contractId,

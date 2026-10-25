@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getJob } from "@/lib/jobs";
 import { getEscrowBalance } from "@/lib/trustless-server";
+import { isUnlocked } from "@/lib/files";
 
 export async function GET(_req: Request, ctx: RouteContext<"/api/jobs/[id]">) {
   const { id } = await ctx.params;
@@ -10,5 +11,5 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/jobs/[id]">) {
   let balance: number | null = null;
   if (job.contractId) balance = await getEscrowBalance(job.contractId).catch(() => null);
 
-  return NextResponse.json({ ...job, balance });
+  return NextResponse.json({ ...job, balance, unlocked: isUnlocked(job) });
 }
