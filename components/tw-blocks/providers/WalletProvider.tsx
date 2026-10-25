@@ -7,6 +7,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
+import { WatchWalletChanges } from "@stellar/freighter-api";
 
 /**
  * Type definition for the wallet context
@@ -48,6 +49,22 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (storedName) setWalletName(storedName);
   }, []);
+
+  /**
+   * Ghost-Proof: follow the account selected in Freighter, so switching
+   * between Designer and Client in Freighter updates the app automatically.
+   */
+  useEffect(() => {
+    if (!walletAddress || walletName !== "Freighter") return;
+    const watcher = new WatchWalletChanges(1500);
+    watcher.watch(({ address }) => {
+      if (address && address !== walletAddress) {
+        setWalletAddress(address);
+        localStorage.setItem("walletAddress", address);
+      }
+    });
+    return () => watcher.stop();
+  }, [walletAddress, walletName]);
 
   /**
    * Set wallet information and save it to localStorage
