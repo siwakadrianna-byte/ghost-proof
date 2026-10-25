@@ -60,6 +60,7 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
   const [notFound, setNotFound] = useState(false);
   const [evidence, setEvidence] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const load = useCallback(async () => {
@@ -193,18 +194,33 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
               <p className="text-sm">
                 Final file (PNG, JPG or WebP). The client only sees a watermarked preview until you&apos;re paid.
               </p>
-              {/* A native label opens the file picker without any JavaScript */}
-              <div className="flex items-center gap-3">
-                <label
-                  htmlFor="delivery-file"
-                  className="inline-flex h-9 cursor-pointer items-center rounded-md border px-4 text-sm font-medium shadow-xs hover:bg-accent"
-                >
-                  {file ? "Change file" : "Choose file"}
-                </label>
-                <span className="text-sm text-muted-foreground truncate">
-                  {file ? `✓ ${file.name}` : "No file chosen yet"}
+              {/* Drop zone: drag an image from Finder, or click to open the file picker */}
+              <label
+                htmlFor="delivery-file"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragging(true);
+                }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragging(false);
+                  const dropped = e.dataTransfer.files?.[0];
+                  if (dropped) setFile(dropped);
+                }}
+                className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed p-6 text-center text-sm transition-colors ${
+                  dragging ? "border-primary bg-accent" : "hover:bg-accent"
+                }`}
+              >
+                {file ? (
+                  <span className="font-medium">✓ {file.name}</span>
+                ) : (
+                  <span className="font-medium">Drag your image here</span>
+                )}
+                <span className="text-muted-foreground">
+                  {file ? "Drop another file to replace it" : "or click to choose a file"}
                 </span>
-              </div>
+              </label>
               <input
                 id="delivery-file"
                 type="file"
