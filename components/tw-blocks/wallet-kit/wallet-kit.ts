@@ -87,13 +87,29 @@ export const signTransaction = async ({
 }: SignTransactionParams): Promise<string> => {
   const { StellarWalletsKit, Networks } = await loadWalletKit();
 
-  const { signedTxXdr } = await StellarWalletsKit.signTransaction(
-    unsignedTransaction,
-    {
-      address,
-      networkPassphrase: Networks.TESTNET, // Adjust this to the network you are using
-    }
+  console.log("[Ghost-Proof] asking wallet to sign", { address });
+
+  // Ghost-Proof: fail with a clear message instead of spinning forever
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(
+      () =>
+        reject(
+          new Error(
+            "Freighter didn't respond. Open Freighter, check it's on Test Net with the right account, and try again."
+          )
+        ),
+      120_000
+    )
   );
 
+  const { signedTxXdr } = await Promise.race([
+    StellarWalletsKit.signTransaction(unsignedTransaction, {
+      address,
+      networkPassphrase: Networks.TESTNET, // Adjust this to the network you are using
+    }),
+    timeout,
+  ]);
+
+  console.log("[Ghost-Proof] wallet signed", { signed: !!signedTxXdr });
   return signedTxXdr;
 };
