@@ -1,7 +1,6 @@
-// Server-only job store: a plain JSON file in /data, good enough for a laptop demo.
-import fs from "fs/promises";
-import path from "path";
+// Server-only job store: one JSON document (data/jobs.json locally, Redis when deployed).
 import crypto from "crypto";
+import { readText, writeText } from "./store";
 
 export type JobStatus =
   | "awaiting_client" // created by designer, no escrow yet
@@ -44,19 +43,18 @@ export type Job = {
   createdAt: string;
 };
 
-const FILE = path.join(process.cwd(), "data", "jobs.json");
+const KEY = "jobs.json";
 
 async function readAll(): Promise<Record<string, Job>> {
   try {
-    return JSON.parse(await fs.readFile(FILE, "utf8"));
+    return JSON.parse((await readText(KEY)) || "{}");
   } catch {
     return {};
   }
 }
 
 async function writeAll(jobs: Record<string, Job>) {
-  await fs.mkdir(path.dirname(FILE), { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(jobs, null, 2));
+  await writeText(KEY, JSON.stringify(jobs, null, 2));
 }
 
 export async function getJob(id: string) {
